@@ -44,6 +44,8 @@ a{color:var(--blue)}
 
 /* MapLibre essentials (library CSS inlined, trimmed) */
 #map{position:absolute;inset:0;background:var(--bg)}
+/* soft blue wash along the bottom of the map, up to the report button (decorative) */
+.seabed{position:absolute;left:0;right:0;bottom:0;height:var(--sea-h,220px);z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(110,170,190,.30),rgba(140,195,210,.14) 45%,rgba(180,220,228,0))}
 .maplibregl-map{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent}
 .maplibregl-canvas{position:absolute;left:0;top:0}
 .maplibregl-canvas-container.maplibregl-interactive{cursor:grab}
@@ -52,7 +54,7 @@ a{color:var(--blue)}
 .maplibregl-control-container{display:none}
 
 /* splash: shown until the map has loaded (min ~2s), then fades out */
-.splash{position:fixed;inset:0;z-index:50;background:#fbf7f3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;overflow:hidden;transition:opacity .6s ease,visibility .6s}
+.splash{position:fixed;inset:0;z-index:50;background:linear-gradient(#ffffff 0%,#fdf7ec 30%,#fbeace 58%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px 24px calc(40% + 110px);text-align:center;overflow:hidden;transition:opacity .6s ease,visibility .6s}
 .splash.out{opacity:0;visibility:hidden}
 .sp-orb{position:relative;width:132px;height:132px;border-radius:50%;overflow:hidden;background:#fff;border:3px solid #80a4aa;box-shadow:0 18px 40px -18px rgba(80,110,114,.55)}
 .sp-orb .w{position:absolute;left:0;width:200%;height:100%;background-repeat:repeat-x;background-size:50% 100%}
@@ -66,23 +68,17 @@ a{color:var(--blue)}
 .sp-slow{margin:-6px 0 0;max-width:330px;padding:10px 16px;border-radius:14px;background:#fff6ee;border:1px solid #f0d9c4;color:#8a5a3c;font-size:13.5px;line-height:1.6;animation:spFade .5s ease-out}
 .sp-slow[hidden]{display:none}
 @keyframes spFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.sp-by{position:absolute;bottom:calc(112px + env(safe-area-inset-bottom,0px));left:0;right:0;font-size:12.5px;color:#66787c;z-index:2}
+.splash>:not(.sp-ocean):not(script){position:relative;z-index:1}
+.sp-by{position:absolute!important;bottom:37%;left:0;right:0;font-size:12.5px;color:#66787c;z-index:2}
 .sp-by b{color:#34444a;font-weight:600}
 .sp-by span{display:block;font-size:11.5px;line-height:1.55;color:#7a8a8e;margin-top:3px;padding:0 16px}
 .sp-by span+span{margin-top:0}
-.sp-sea{position:absolute;left:0;right:0;bottom:0;height:96px;pointer-events:none}
-.sp-sea .w{position:absolute;left:0;bottom:0;width:200%;height:100%;background-repeat:repeat-x;background-size:25% 100%}
-.sp-sea .w1{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef7f6'/%3E%3Cstop offset='1' stop-color='%23cfe6e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 18 Q15 11 30 18 Q45 25 60 18 Q75 11 90 18 Q105 25 120 18 V60 H0Z' fill='url%28%23a%29'/%3E%3Cpath d='M0 21 Q15 14 30 21 Q45 28 60 21 Q75 14 90 21 Q105 28 120 21' fill='none' stroke='white' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E")}
-.sp-sea .w2{height:82%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23c6e3e2'/%3E%3Cstop offset='1' stop-color='%239fcdcf'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 22 Q15 15 30 22 Q45 29 60 22 Q75 15 90 22 Q105 29 120 22 V60 H0Z' fill='url%28%23b%29'/%3E%3Cpath d='M0 25 Q15 18 30 25 Q45 32 60 25 Q75 18 90 25 Q105 32 120 25' fill='none' stroke='white' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");filter:drop-shadow(0 -4px 8px rgba(40,85,95,.22))}
-.sp-sea .w3{height:62%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2393c4ca'/%3E%3Cstop offset='1' stop-color='%236a9fa8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 28 Q15 22 30 28 Q45 34 60 28 Q75 22 90 28 Q105 34 120 28 V60 H0Z' fill='url%28%23c%29'/%3E%3Cpath d='M0 31 Q15 25 30 31 Q45 37 60 31 Q75 25 90 31 Q105 37 120 31' fill='none' stroke='white' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");filter:drop-shadow(0 -4px 8px rgba(40,85,95,.28))}
+.sp-ocean{position:absolute;left:0;right:0;bottom:0;width:100%;height:40%;pointer-events:none;z-index:0}
 @media (prefers-reduced-motion: no-preference){
   .sp-orb .w1{animation:spWave 3.2s linear infinite,spRise 2.6s ease-out forwards}
   .sp-orb .w2{animation:spWave 2.3s linear infinite reverse,spRise2 2.6s ease-out forwards}
   .sp-orb .sp-drop{animation:spDrop 1.6s ease-in infinite}
   .sp-bar i{animation:spBar 1.4s ease-in-out infinite}
-  .sp-sea .w1{animation:spWave 6s linear infinite}
-  .sp-sea .w2{animation:spWave 4.5s linear infinite reverse}
-  .sp-sea .w3{animation:spWave 3.6s linear infinite}
 }
 @media (prefers-reduced-motion: reduce){ .sp-orb .w1{bottom:-20%} .sp-orb .w2{bottom:-28%} }
 @keyframes spWave{to{transform:translateX(-50%)}}
@@ -248,8 +244,8 @@ a{color:var(--blue)}
 }
 @keyframes pulse{50%{opacity:.45}}
 /* ---------- flood reports ---------- */
-.fab{position:absolute;right:16px;bottom:208px;z-index:5;display:flex;align-items:center;gap:8px;padding:12px 18px 12px 14px;border-radius:999px;border:0;cursor:pointer;
-  background:#dd785b;color:#fff;font:600 14px var(--f-ui);box-shadow:0 10px 26px -8px rgba(221,120,91,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+.fab{position:absolute;right:16px;bottom:208px;z-index:5;display:flex;align-items:center;gap:8px;padding:14px 22px 14px 17px;border-radius:999px;border:0;cursor:pointer;
+  background:#dd785b;color:#fff;font:600 16px var(--f-ui);box-shadow:0 10px 26px -8px rgba(221,120,91,.7),inset 0 1px 0 rgba(255,255,255,.35)}
 .fab:hover{filter:brightness(1.06)} .fab:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .fab svg{flex:none}
 .rsheet{position:absolute;top:16px;right:16px;width:min(380px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;padding:16px;z-index:7;display:flex;flex-direction:column;gap:14px}
@@ -521,9 +517,11 @@ body.sheet-open #calls,body.sheet-open #callarrows{display:none}
 @keyframes spFloat{50%{transform:translateY(-8px)}}
 .tb-logo{background:none!important;box-shadow:none!important;border-radius:50%!important}
 .tb-logo .app-logo{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(60,80,84,.3))}
-.legend-hide{align-self:flex-end;margin:-2px -2px -4px 0;border:0;background:none;cursor:pointer;font:600 11px var(--f-ui);color:#7a8a90;padding:2px 6px;border-radius:8px}
+.legend-hide{align-self:flex-end;margin:-3px -3px -5px 0;border:0;background:none;cursor:pointer;color:#6c7f84;padding:3px 8px;border-radius:10px;display:inline-flex;line-height:0}
+.tg-sep{flex-basis:100%;height:0}
+.tg-sub{opacity:.8}
 .legend-hide:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
-.legend-pill{position:absolute;left:16px;bottom:16px;z-index:4;border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 12px var(--f-ui);color:#34444a}
+.legend-pill{position:absolute;left:16px;bottom:16px;z-index:4;border:0;cursor:pointer;padding:8px 14px 8px 11px;border-radius:999px;font:600 12px var(--f-ui);color:#34444a;display:inline-flex;align-items:center;gap:6px}
 body.legend-off .legend{display:none!important}
 @media (max-width:760px){ .legend-pill{left:10px;bottom:10px} }
 .tb-brand h1,.sp-title{font-family:"Prompt",var(--f-ui)!important;font-weight:600}
@@ -532,9 +530,65 @@ body.legend-off .legend{display:none!important}
 #calls .src.out{background:rgba(210,203,227,.5);border-color:rgba(162,153,184,.3);color:#5b5277}
 #calls .src .abadge,#calls .src .abadge svg{width:20px;height:20px}
 #calls .src:hover{opacity:1}
+/* ---------- live chat: tab on the right edge → panel slides in over everything ---------- */
+/* live-chat badge: clay speech bubble with typing dots + "LIVE / แชทสด" box, tucked against the right edge */
+.chat-tab{position:absolute;right:0;top:44%;z-index:55;border:0;padding:0 0 0 0;background:none;cursor:pointer;width:68px;height:68px;filter:drop-shadow(-4px 8px 12px rgba(60,90,96,.35))}
+.ct-box{position:absolute;right:0;bottom:0;width:68px;height:44px;border-radius:16px 0 0 16px;background:linear-gradient(160deg,#8fb7bb,#5a8a94);
+  box-shadow:inset 1px 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(30,60,70,.22);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 8px 3px;color:#fff;line-height:1}
+.ct-box b{font:800 10px "Prompt",var(--f-ui);letter-spacing:1.6px;opacity:.95}
+.ct-box span{font:700 13.5px "Prompt",var(--f-ui);margin-top:2px;text-shadow:0 1px 1px rgba(20,50,60,.25)}
+.ct-bub{position:absolute;left:13px;top:0;width:42px;height:38px;display:flex;align-items:center;justify-content:center;gap:3.5px;padding:0 2px 6px 0}
+.ct-bub svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 4px rgba(120,50,30,.3))}
+.ct-bub i{position:relative}
+.ct-bub i{width:6px;height:6px;border-radius:50%;background:#fff;animation:ctType 1.2s ease-in-out infinite}
+.ct-bub i:nth-child(2){animation-delay:.18s}.ct-bub i:nth-child(3){animation-delay:.36s}
+@keyframes ctType{0%,60%,100%{transform:translateY(0);opacity:.55}30%{transform:translateY(-4px);opacity:1}}
+.chat-tab .chat-badge{position:absolute;top:-6px;left:46px;z-index:2;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#ea994d;color:#fff;font:700 10.5px/18px var(--f-ui);text-align:center}
+.chat-tab .chat-badge[hidden]{display:none}
+.chat-dim{position:fixed;inset:0;z-index:58;background:rgba(52,68,74,.22);opacity:0;pointer-events:none;transition:opacity .3s}
+.chat-dim.on{opacity:1;pointer-events:auto}
+.chat{position:fixed;top:0;bottom:0;right:0;width:min(70vw,900px);z-index:60;display:flex;flex-direction:column;border-radius:26px 0 0 26px;
+  color:#34444a;background:radial-gradient(110% 70% at 100% 100%,rgba(180,216,212,.55) 0%,transparent 60%),radial-gradient(90% 60% at 0% 0%,rgba(242,207,201,.45) 0%,transparent 60%),linear-gradient(165deg,rgba(255,253,249,.72) 0%,rgba(251,244,234,.72) 55%,rgba(243,235,224,.72) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 30px 70px -20px rgba(60,80,86,.45),inset 0 1px 0 #fff,inset 0 -2px 0 rgba(160,140,110,.12);transform:translateX(calc(100% + 30px));transition:transform .38s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+.chat.open{transform:none;visibility:visible}
+.chat-head{border-radius:26px 0 0 0}
+.chat-head{display:flex;align-items:center;gap:12px;padding:16px 18px 12px}
+.chat-head h2{margin:0;font:700 19px "Prompt",var(--f-ui);letter-spacing:.3px;color:#2f3f44}
+.chat-head p{margin:2px 0 0;font-size:11.5px;color:#7a8a8e}
+.chat-head .live{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:#fdeee9;font:600 10.5px var(--f-ui);color:#c4553e;letter-spacing:.6px}
+.chat-head .live i{width:6px;height:6px;border-radius:50%;background:#e8735a;box-shadow:0 0 0 3px rgba(232,115,90,.2)}
+.chat-grip{position:absolute;left:-20px;top:50%;width:40px;height:72px;margin-top:-36px;border:0;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(160deg,#9cc0c4,#5f8f98);box-shadow:-6px 8px 18px -8px rgba(60,100,108,.6),inset 1px 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(30,60,70,.2)}
+.chat-grip:hover{filter:brightness(1.06)}
+.chat-hide{flex:none;align-self:flex-start;display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 12px 0 9px;border:0;border-radius:999px;background:#fff;color:#5c6d73;font:600 12.5px "Prompt",var(--f-ui);cursor:pointer;box-shadow:0 6px 14px -8px rgba(60,80,86,.5),inset 0 -2px 0 rgba(0,0,0,.06)}
+.chat-list{flex:1;overflow-y:auto;padding:6px 18px 14px 32px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.chat-list::-webkit-scrollbar{width:6px}.chat-list::-webkit-scrollbar-thumb{background:rgba(92,109,115,.25);border-radius:3px}
+.cmsg{display:flex;flex-direction:column;align-items:flex-start;max-width:min(560px,100%)}
+.cmsg.mine{align-self:flex-end;align-items:flex-end}
+.cname{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:9px 9px 9px 3px;font:700 10px "Prompt",var(--f-ui);letter-spacing:.6px;color:var(--c3,#8a4a32);
+  background:linear-gradient(90deg,var(--c1,#fbe3d3),var(--c2,#f6d2bf));box-shadow:0 6px 14px -8px rgba(60,80,86,.55),inset 0 1px 0 rgba(255,255,255,.35)}
+.cmsg.mine .cname{border-radius:9px 9px 3px 9px}
+.cname small{font:500 9px var(--f-ui);letter-spacing:0;opacity:.75}
+.cbody{margin-top:4px;padding:10px 16px;border-radius:4px 16px 16px 16px;background:linear-gradient(160deg,#5d8790,#46717b);color:#fff;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;
+  box-shadow:0 10px 20px -14px rgba(60,80,86,.55),inset 0 -2px 0 rgba(160,140,110,.08)}
+.cmsg.mine .cbody{border-radius:16px 4px 16px 16px;background:linear-gradient(160deg,#d98563,#c4674c)}
+.cdel{margin-left:2px;border:0;background:none;color:inherit;text-decoration:underline;cursor:pointer;font-size:9px;padding:0}
+.chat-empty{margin:auto;text-align:center;color:#8a9a9e;font-size:13px;line-height:1.7}
+.chat-form{display:flex;gap:8px;border-radius:0 0 0 26px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.6);border-top:1px solid rgba(160,140,110,.15)}
+.chat-form input{min-width:0;border:1px solid #e6ddd0;background:#fff;color:#34444a;border-radius:14px;padding:11px 13px;font:500 14px var(--f-ui);outline:none}
+.chat-form input::placeholder{color:#a3adb0}
+.chat-form input:focus{border-color:#80a4aa;box-shadow:0 0 0 3px rgba(128,164,170,.2)}
+.chat-form #chatName{flex:0 0 28%;max-width:170px}
+.chat-form #chatText{flex:1}
+.chat-form button{flex:none;border:0;border-radius:14px;padding:0 18px;font:700 14px "Prompt",var(--f-ui);color:#fff;cursor:pointer;background:linear-gradient(135deg,#ea994d,#dd785b);box-shadow:0 8px 18px -8px rgba(221,120,91,.8),inset 0 1px 0 rgba(255,255,255,.35)}
+.chat-form button:disabled{opacity:.5}
+.chat-note{padding:0 18px 4px;font-size:11px;color:#c4553e;min-height:0}
+@media (max-width:760px){ .chat{width:calc(100% - 64px)} .chat-form #chatName{flex-basis:30%} .chat-tab{top:40%;transform:scale(.88);transform-origin:right center} }
+body.sheet-open .chat-tab{display:none}
 </style>
 
 <div class="app no-edges" id="app">
+  <div class="seabed" id="seabed" aria-hidden="true"></div>
   <div id="map" role="region" aria-label="แผนที่ OpenFreeMap อำเภอหาดใหญ่ พร้อมกล้อง CCTV"></div>
   <svg id="ov" aria-hidden="true"><defs id="defs"></defs><g class="edges" id="edges"></g><g id="leads"></g><g class="calls" id="callarrows"></g></svg>
   <div id="calls" class="calls"></div>
@@ -564,7 +618,65 @@ body.legend-off .legend{display:none!important}
     <p class="sp-slow" id="spSlow" hidden>ระบบกำลังทำงาน กรุณารอสักครู่</p>
     <script>setTimeout(function(){var sp=document.getElementById('splash'),m=document.getElementById('spSlow');if(sp&&m&&!sp.classList.contains('out'))m.hidden=false;},8000);</script>
     <div class="sp-by">พัฒนาระบบโดย <b>นพ.วรกานต์ รุ่งประเสริฐ</b><span>แพทย์ประจำบ้าน สาขาวิชาเวชศาสตร์ครอบครัวและเวชศาสตร์ป้องกัน</span><span>คณะแพทยศาสตร์ มหาวิทยาลัยสงขลานครินทร์</span></div>
-    <div class="sp-sea" aria-hidden="true"><span class="w w1"></span><span class="w w2"></span><span class="w w3"></span></div>
+    <canvas class="sp-ocean" id="spOcean" aria-hidden="true"></canvas>
+    <script>
+/* ---------- clay sea: layered rolling waves (crisp vector, any size), t = seconds for animation ---------- */
+function drawSeaScene(g, W, H, t, o) {
+  o = o || {}; t = t || 0;
+  const hz = H * .15, hg = g.createLinearGradient(0, 0, 0, hz + H * .12);   // peach horizon glow
+  hg.addColorStop(0, 'rgba(251,234,206,0)'); hg.addColorStop(.5, 'rgba(248,190,156,.9)'); hg.addColorStop(1, 'rgba(242,160,134,.95)');
+  g.fillStyle = hg; g.fillRect(0, 0, W, hz + H * .12);
+  const L = [ // base y, amplitude, wavelength, speed, light, deep
+    [.16, .02, .38, .12, '#d3e3dc', '#b4cfca'],
+    [.23, .03, .45, -.15, '#b7d1cf', '#94b9bc'],
+    [.31, .04, .52, .18, '#9cc0c3', '#7aa6ad'],
+    [.40, .05, .6, -.22, '#86b0b6', '#64939d'],
+    [.50, .062, .7, .26, '#6f9ea8', '#4f808d'],
+    [.61, .075, .8, -.3, '#5b8d9a', '#3e6e7e'],
+    [.73, .088, .92, .34, '#4a7d8c', '#30596b'],
+    [.86, .1, 1.05, -.38, '#3b6c7d', '#22485a']];
+  const sc = H / 400, step = Math.max(2.5, W / 220);
+  const pk = s => Math.pow((s + 1) / 2, 2.4);
+  const crest = (l, x, i) => { const [fy, fa, fw, sp] = l, k = Math.PI * 2 / (fw * W), ph = t * sp * 2.2 + i * 1.9;
+    const a = pk(Math.sin(x * k + ph)), b = pk(Math.sin(x * k * 1.85 - ph * 1.25 + i * 2.3));
+    const amp = fa * (i >= 4 ? 1.3 : 1);
+    return {y: H * fy - H * amp * (a * .68 + b * .42), p: Math.max(a, b * .8)}; };
+  L.forEach((l, i) => {
+    const pts = []; for (let x = -12; x <= W + 12; x += step) { const c = crest(l, x, i); pts.push([x, c.y, c.p]); }
+    const body = new Path2D(); body.moveTo(-12, H + 12); pts.forEach(([x, y]) => body.lineTo(x, y)); body.lineTo(W + 12, H + 12); body.closePath();
+    const top = H * (l[0] - l[1]), gr = g.createLinearGradient(0, top, 0, Math.min(H, top + H * .3));
+    gr.addColorStop(0, l[4]); gr.addColorStop(1, l[5]);
+    g.save(); g.shadowColor = 'rgba(16,44,58,.38)'; g.shadowBlur = (8 + i * 2.2) * sc; g.shadowOffsetY = -2.5 * sc; g.fillStyle = gr; g.fill(body); g.restore();
+    g.save(); g.clip(body);
+    // puffy clay: broad soft light under the crest, then inner shade further down
+    g.beginPath(); pts.forEach(([x, y], j) => j ? g.lineTo(x, y + (12 + i * 1.5) * sc) : g.moveTo(x, y + (12 + i * 1.5) * sc));
+    g.lineWidth = (18 + i * 3) * sc; g.lineJoin = 'round'; g.strokeStyle = 'rgba(255,255,255,.14)'; g.stroke();
+    const sh = g.createLinearGradient(0, top + H * .1, 0, top + H * .32); sh.addColorStop(0, 'rgba(12,36,50,0)'); sh.addColorStop(1, 'rgba(12,36,50,.2)'); g.fillStyle = sh; g.fillRect(0, top, W, H);
+    g.restore();
+    // cream crest ribbon: swells on the peaks, thins in the troughs
+    const rib = new Path2D(); pts.forEach(([x, y], j) => j ? rib.lineTo(x, y - .6 * sc) : rib.moveTo(x, y - .6 * sc));
+    for (let j = pts.length - 1; j >= 0; j--) { const [x, y, p] = pts[j]; rib.lineTo(x, y + (1 + p * (2.5 + i * 1.25)) * (o.ribbon || 1) * sc); }
+    rib.closePath();
+    g.save(); g.shadowColor = 'rgba(16,44,58,.25)'; g.shadowBlur = 3 * sc; g.shadowOffsetY = 1 * sc;
+    const cg = g.createLinearGradient(0, top, 0, top + H * l[1] * 2.2); cg.addColorStop(0, '#fffaf0'); cg.addColorStop(1, '#eadfc4');
+    g.fillStyle = cg; g.fill(rib); g.restore();
+  });
+}
+
+    /* splash: the clay sea keeps rolling until the map is ready */
+    (function () {
+      var cv = document.getElementById('spOcean'), sp = document.getElementById('splash'); if (!cv || !cv.getContext) return;
+      var g = cv.getContext('2d'), d = Math.min(2, window.devicePixelRatio || 1), slow = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? .4 : 1, W, H, t0 = null;
+      function size() { W = cv.clientWidth; H = cv.clientHeight; cv.width = Math.round(W * d); cv.height = Math.round(H * d); g.setTransform(d, 0, 0, d, 0, 0); }
+      function frame(ts) {
+        if (!sp.isConnected) return;
+        if (t0 === null) t0 = ts;
+        g.clearRect(0, 0, W, H); drawSeaScene(g, W, H, (ts - t0) / 1000 * slow);
+        requestAnimationFrame(frame);
+      }
+      size(); addEventListener('resize', size); requestAnimationFrame(frame);
+    })();
+    </script>
   </div>
   <div class="loading" id="loading"><div class="glass"><span class="spin"></span>กำลังโหลดแผนที่ OpenFreeMap…</div></div>
 
@@ -574,24 +686,34 @@ body.legend-off .legend{display:none!important}
   <aside class="rsheet glass" id="rsheet" hidden aria-label="รายงานน้ำท่วม"></aside>
 
 
-  <button type="button" class="legend-pill glass" id="legendShow" hidden aria-controls="legend" title="แสดงตัวเลือกชั้นข้อมูล">☰ ตัวเลือก</button>
+  <button type="button" class="legend-pill glass" id="legendShow" hidden aria-controls="legend" title="ขยายแถบตัวเลือก" aria-label="ขยายแถบตัวเลือก"><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17.5l7-7 7 7M5 11.5l7-7 7 7"/></svg><span>ตัวเลือก</span></button>
   <div class="legend glass" id="legend">
-    <button type="button" class="legend-hide" id="legendHide" aria-controls="legend" title="ซ่อนแถบตัวเลือก">ซ่อน ▾</button>
+    <button type="button" class="legend-hide" id="legendHide" aria-controls="legend" title="ย่อแถบตัวเลือก" aria-label="ย่อแถบตัวเลือก"><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6.5l7 7 7-7M5 12.5l7 7 7-7"/></svg></button>
     <div class="near" id="near" hidden></div>
     <div class="flowpanel" id="flowPanel" hidden></div>
     <div class="flowpanel" id="shelterPanel" hidden></div>
     <div class="tgs" role="group" aria-label="ชั้นข้อมูล">
-      <button type="button" class="tg" id="flowBtn" aria-expanded="false" aria-controls="flowPanel">ลำดับ flow ▸</button>
-      <button type="button" class="tg" id="shelterBtn" aria-expanded="false" aria-controls="shelterPanel">จุดอพยพ ▸</button>
-      <button type="button" class="tg" id="tgShelter" aria-pressed="false">ไอคอนจุดอพยพ</button>
-      <button type="button" class="tg" id="tgEdges" aria-pressed="false">เส้นลำดับ flow</button>
+      <button type="button" class="tg" id="tgRep" aria-pressed="true">รายงานจากผู้ใช้</button>
+      <button type="button" class="tg" id="tgShelter" aria-pressed="false">ศูนย์อพยพ</button>
       <button type="button" class="tg" id="tgFlow" aria-pressed="true">ทิศทางน้ำ</button>
       <button type="button" class="tg" id="tgCall" aria-pressed="true">ที่มาของน้ำ</button>
-      <button type="button" class="tg" id="tgRep" aria-pressed="true">รายงานจากชาวบ้าน</button>
-      <button type="button" class="tg tg-admin" id="tgAdmin" onclick="document.getElementById('adminBtn').click()">🔒 ผู้ดูแล</button>
+      <span class="tg-sep" aria-hidden="true"></span>
+      <button type="button" class="tg tg-sub" id="shelterBtn" aria-expanded="false" aria-controls="shelterPanel">รายชื่อศูนย์อพยพ ▸</button>
+      <button type="button" class="tg tg-sub" id="flowBtn" aria-expanded="false" aria-controls="flowPanel">ลำดับ flow ▸</button>
+      <button type="button" class="tg tg-sub" id="tgEdges" aria-pressed="false">เส้นลำดับ flow</button>
+      <button type="button" class="tg tg-admin tg-sub" id="tgAdmin" onclick="document.getElementById('adminBtn').click()">🔒 ผู้ดูแล</button>
     </div>
   </div>
 
+  <button type="button" class="chat-tab" id="chatTab" aria-controls="chat" aria-expanded="false" aria-label="เปิดแชทสด"><span class="ct-box"><span>แชทสด</span></span><span class="ct-bub" aria-hidden="true"><svg viewBox="0 0 48 44"><defs><radialGradient id="ctg" cx=".36" cy=".3" r=".75"><stop offset="0" stop-color="#f7b796"/><stop offset=".8" stop-color="#dd785b"/></radialGradient></defs><path d="M24 2.5C12.7 2.5 3.5 10.6 3.5 20.5S12.7 38.5 24 38.5c2.6 0 5.1-.4 7.4-1.2L42 42.5l-3.6-8.6c3.6-3.3 6-7.8 6-13.4 0-9.9-9.2-18-20.4-18z" fill="url(#ctg)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/></svg><i></i><i></i><i></i></span><b class="chat-badge" id="chatBadge" hidden>0</b></button>
+  <div class="chat-dim" id="chatDim"></div>
+  <aside class="chat" id="chat" aria-label="แชทสด" aria-hidden="true">
+    <button type="button" class="chat-grip" id="chatGrip" aria-label="ซ่อนแชท" title="ซ่อนแชท"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
+    <div class="chat-head"><button type="button" class="chat-hide" id="chatClose" aria-label="ซ่อนแชท"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5l7 7-7 7M12 5l7 7-7 7"/></svg>ซ่อน</button><div><h2>แชทสด</h2><p>คุยกันเรื่องน้ำท่วมหาดใหญ่ · ข้อความลบอัตโนมัติใน 24 ชม.</p></div></div>
+    <div class="chat-list" id="chatList" aria-live="polite"></div>
+    <div class="chat-note" id="chatNote"></div>
+    <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatName" maxlength="24" placeholder="ไม่ระบุชื่อ" aria-label="ชื่อ (ไม่ใส่ก็ได้)"><input id="chatText" maxlength="280" placeholder="พิมพ์ข้อความ…" aria-label="ข้อความ"><button type="submit" id="chatSend">ส่ง</button></form>
+  </aside>
   <div class="toast glass" id="toast" hidden role="status"><span id="toastText"></span><button type="button" id="toastBtn">ยกเลิก</button></div>
   <div class="zoom glass">
     <button class="zbtn" id="zLoc" type="button" aria-label="ตำแหน่งปัจจุบัน" title="ตำแหน่งปัจจุบัน"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg></button>
@@ -635,7 +757,10 @@ body.legend-off .legend{display:none!important}
     pulling = false; if (again) { again = false; pull(); }
   }
   const pullSoon = () => { clearTimeout(soon); soon = setTimeout(pull, 60); };
-  setInterval(() => { if (!document.hidden) pull(); }, POLL_MS);
+  window.__pullNow = pullSoon;
+  // poll every 15 s, every 4 s while the live chat is open
+  let lastPull = Date.now();
+  setInterval(() => { if (!document.hidden && Date.now() - lastPull >= (window.__chatOpen ? 4000 : POLL_MS)) { lastPull = Date.now(); pull(); } }, 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
   function subscribe(s) { subs.push(s); if (data) fire(s); else pullSoon(); return () => { const i = subs.indexOf(s); if (i >= 0) subs.splice(i, 1); }; }
   async function write(op, col, id, body) {
@@ -929,8 +1054,9 @@ function brand(g, W, logo) {
   g.fillStyle = '#1f3a46'; let fs = 48; g.font = F(600, fs); const t1 = 'ระบบรายงานน้ำท่วมหาดใหญ่โดยภาคประชาชน';
   while (g.measureText(t1).width > maxW && fs > 26) { fs--; g.font = F(600, fs); } g.fillText(t1, tx, y + 46);
   g.fillStyle = '#7a8a90'; g.font = F(400, 26); const t2 = 'พัฒนาระบบโดย นพ.วรกานต์ รุ่งประเสริฐ'; g.fillText(t2, tx, y + 88);
-  const lx = tx + g.measureText(t2).width + 18; g.font = F(600, 20); const lw = g.measureText('LIVE').width + 40; rr(g, lx, y + 62, lw, 34, 17); g.fillStyle = '#fdeee9'; g.fill();
-  g.beginPath(); g.arc(lx + 17, y + 79, 5.5, 0, Math.PI * 2); g.fillStyle = '#e8735a'; g.fill(); g.fillStyle = '#c4553e'; g.fillText('LIVE', lx + 28, y + 86);
+  // LIVE pill: top-right corner, above the title line
+  g.font = F(600, 20); const lw = g.measureText('LIVE').width + 40, lx = W - 72 - lw, ly = 28; rr(g, lx, ly, lw, 34, 17); g.fillStyle = '#fdeee9'; g.fill();
+  g.beginPath(); g.arc(lx + 17, ly + 17, 5.5, 0, Math.PI * 2); g.fillStyle = '#e8735a'; g.fill(); g.fillStyle = '#c4553e'; g.fillText('LIVE', lx + 28, ly + 24);
 }
 // shrink a single line until it fits (Prompt is a little wider than the UI font)
 function fitFont(g, text, w, px, maxW, min) { let f = px; g.font = F(w, f); while (g.measureText(text).width > maxW && f > (min || 18)) { f--; g.font = F(w, f); } return f; }
@@ -944,6 +1070,50 @@ async function drawQR(g, x, y, size) {
   g.fillStyle = '#1f3a46'; for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) g.fillRect(x + pad + c * cell, y + pad + r * cell, Math.ceil(cell), Math.ceil(cell));
   g.restore(); }
 // flood water along the bottom: soft 3D "clay" layers in the theme colours (gradient body, cast shadow, glossy crest, bubbles)
+/* ---------- seigaiha water (overlapping clay scales + curly foam), theme colours ---------- */
+function drawSeigaiha(g, W, top, H, R, opt) {
+  opt = opt || {}; const ox = opt.ox || 0, foam = opt.foam !== false;
+  // rings from outside in; every lower row is a touch deeper so text on top stays readable
+  const RINGS = opt.minimal ? [['#a3cbcc', '#86b5ba'], ['#e6f3f2', '#d3e9e7'], ['#93c0c3', '#79a9b0']]
+    : [['#9cc8c9', '#78a9b0'], ['#e3f2f1', '#c4e1df'], ['#86b6bc', '#6797a0'], ['#d2e9e7', '#b1d6d3'], ['#74a5ad', '#5a8b94']];
+  const fr = opt.minimal ? [1, .7, .4] : [1, .8, .6, .4, .2], soft = opt.minimal ? .5 : 1;
+  const mix = (h, k) => { const n = parseInt(h.slice(1), 16), r = n >> 16, gg = n >> 8 & 255, b = n & 255, d = [44, 92, 104];
+    return `rgb(${Math.round(r + (d[0] - r) * k)},${Math.round(gg + (d[1] - gg) * k)},${Math.round(b + (d[2] - b) * k)})`; };
+  const dx = 2 * R, dy = R * .52;
+  const rows = Math.ceil((H - top) / dy) + 2;
+  for (let j = 0; j < rows; j++) {
+    const cy = top + R + j * dy, off = (j % 2) * R, deep = Math.min(.55, j * .085);
+    for (let x = -dx * 2 + ((ox + off) % dx); x < W + dx * 2; x += dx) {
+      // soft shadow cast up onto the row behind (clay depth)
+      g.save(); g.shadowColor = `rgba(28,66,76,${.32 * soft})`; g.shadowBlur = R * .22; g.shadowOffsetY = -R * .07;
+      g.beginPath(); g.arc(x, cy, R, Math.PI, 0); g.lineTo(x + R, cy + R); g.lineTo(x - R, cy + R); g.closePath(); g.fillStyle = mix(RINGS[0][1], deep); g.fill(); g.restore();
+      fr.forEach((f, i) => { const r = R * f;
+        const gr = g.createRadialGradient(x - r * .35, cy - r * .55, r * .05, x, cy, r * 1.05);
+        gr.addColorStop(0, mix(RINGS[i][0], deep * .8)); gr.addColorStop(1, mix(RINGS[i][1], deep));
+        g.save(); if (i) { g.shadowColor = 'rgba(28,66,76,.22)'; g.shadowBlur = R * .08; g.shadowOffsetY = -R * .03; }
+        g.beginPath(); g.arc(x, cy, r, Math.PI, 0); g.lineTo(x + r, cy + R); g.lineTo(x - r, cy + R); g.closePath(); g.fillStyle = gr; g.fill(); g.restore();
+        // glossy rim light on the upper-left of each ring
+        g.beginPath(); g.arc(x, cy, r - R * .035, Math.PI * 1.12, Math.PI * 1.55); g.lineWidth = R * .035; g.lineCap = 'round'; g.strokeStyle = `rgba(255,255,255,${(.5 - deep * .5) * soft})`; g.stroke();
+      });
+    }
+  }
+  if (opt.calm) { // deeper, calmer water under the text
+    const sh = g.createLinearGradient(0, top + R * opt.calm, 0, H); sh.addColorStop(0, 'rgba(46,96,108,0)'); sh.addColorStop(.45, 'rgba(46,96,108,.5)'); sh.addColorStop(1, 'rgba(36,80,92,.72)');
+    g.fillStyle = sh; g.fillRect(0, top + R * opt.calm, W, H); }
+  if (!foam) return;
+  // a few clay foam curls riding the first row of crests
+  const curl = (x, y, s) => {
+    const puffs = [[-.62, .18, .46], [.62, .2, .44], [0, -.05, .6], [-.2, -.5, .4], [.32, -.46, .36]];
+    g.save(); g.shadowColor = 'rgba(28,66,76,.3)'; g.shadowBlur = s * .3; g.shadowOffsetY = s * .1;
+    puffs.forEach(([px, py, pr]) => { const cx = x + px * s, cy = y + py * s, r = pr * s;
+      const gr = g.createRadialGradient(cx - r * .4, cy - r * .45, r * .1, cx, cy, r); gr.addColorStop(0, '#ffffff'); gr.addColorStop(.7, '#eef8f7'); gr.addColorStop(1, '#c6e1df');
+      g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fillStyle = gr; g.fill(); });
+    g.restore();
+    g.beginPath(); for (let a = 0; a < Math.PI * 2.6; a += .12) { const rr = s * .04 + a * s * .045, px = x + Math.cos(a + 2) * rr, py = y - s * .08 + Math.sin(a + 2) * rr; a ? g.lineTo(px, py) : g.moveTo(px, py); }
+    g.lineWidth = s * .07; g.lineCap = 'round'; g.strokeStyle = 'rgba(110,165,172,.6)'; g.stroke();
+  };
+  (opt.curls || []).forEach(([fx, fs]) => { const x = ((fx * W + ox) % W + W) % W; const y = top + R * .08; curl(x, y, R * fs); if (x < R * 2) curl(x + W, y, R * fs); if (x > W - R * 2) curl(x - W, y, R * fs); });
+}
 function floodWater(g, W, H, top) {
   const layers = [
     {c: ['#e2f1f1', '#c9e4e4'], dy: -44, amp: 16, k: 2.2, ph: 0},
@@ -968,7 +1138,9 @@ function floodWater(g, W, H, top) {
     g.save(); g.shadowColor = 'rgba(30,70,80,.25)'; g.shadowBlur = 8; g.shadowOffsetY = 3; g.beginPath(); g.arc(x, yy, r, 0, Math.PI * 2); g.fillStyle = rg; g.fill(); g.restore(); });
 }
 async function footer(g, W, H, top) {
-  floodWater(g, W, H, top);
+  const sh = 340, sy = H - sh;   // horizon starts just under the picture frame
+  g.save(); g.translate(0, sy); drawSeaScene(g, W, sh, 0.6, {ribbon: .6}); g.restore();
+  const dk = g.createLinearGradient(0, H - 290, 0, H); dk.addColorStop(0, 'rgba(16,44,60,0)'); dk.addColorStop(.35, 'rgba(16,44,60,.32)'); dk.addColorStop(1, 'rgba(16,44,60,.55)'); g.fillStyle = dk; g.fillRect(0, H - 300, W, 300);
   const qs = 176, qy = H - qs - 52; await drawQR(g, W - 72 - qs, qy, qs);
   const tw = W - 72 - qs - 40 - 72;
   g.save(); g.textBaseline = 'alphabetic'; g.shadowColor = 'rgba(25,60,70,.35)'; g.shadowBlur = 8; g.shadowOffsetY = 2;
@@ -981,8 +1153,11 @@ async function footer(g, W, H, top) {
 async function drawCard(kind, fmt, id) {
   try { await Promise.all([F(700, 40), F(600, 40), F(500, 40), F(400, 40)].map(f => document.fonts.load(f))); } catch (e) {}
   const story = fmt === 'story', W = 1080, H = story ? 1920 : 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-  g.fillStyle = '#fafaf7'; g.fillRect(0, 0, W, H); brand(g, W, await getLogo());
-  const footTop = H - (story ? 360 : 330); let y = story ? 250 : 210; g.textBaseline = 'alphabetic';
+  // white at the top, warming to the cream of the sea illustration at the bottom
+  const SEA_H = Math.round(W * 280 / 740), seaY = H - SEA_H + 20;
+  const bg = g.createLinearGradient(0, 0, 0, seaY + 40); bg.addColorStop(0, '#ffffff'); bg.addColorStop(.55, '#fdf7ec'); bg.addColorStop(1, '#fbeace');
+  g.fillStyle = bg; g.fillRect(0, 0, W, H); brand(g, W, await getLogo());
+  const footTop = H - 250; let y = story ? 250 : 210; g.textBaseline = 'alphabetic';
   if (kind === 'report') {
     const r = reports.find(x => x.id === id); if (!r) return null; const st = repState(r), vi = verifyInfo(r), col = st.receded ? '#b9a98a' : LVL[r.level].color;
     const shot = await mapShot({center: [r.lon, r.lat], zoom: 15.4});        // also loads the tiles used for the place name
@@ -1079,7 +1254,7 @@ function showThanks(id, photoOk) {
 }
 const SPLASH_T0 = performance.now();
 function hideSplash() { const sp = document.getElementById('splash'); if (!sp || sp.classList.contains('out')) return;
-  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 700); }, Math.max(0, 1400 - (performance.now() - SPLASH_T0))); }
+  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 700); }, Math.max(0, 3500 - (performance.now() - SPLASH_T0))); }
 setTimeout(hideSplash, 20000);   // never trap the user behind the splash
 function iconImage(size, draw) { const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d'); draw(g, size); return g.getImageData(0, 0, size, size); }
 const ARROW_IMG = () => iconImage(64, (g, s) => {
@@ -1129,9 +1304,9 @@ function addOverlayLayers() {
   // faint white streaks travel downstream on top (OSM/OpenMapTiles draw each waterway in the direction it flows)
   const WW = {source:'openmaptiles', 'source-layer':'waterway', filter:['!=', ['get','brunnel'], 'tunnel']};
   map.addLayer({id:'flow-water', type:'line', ...WW, layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#80a4aa', 'line-opacity':.7, 'line-width':['interpolate',['linear'],['zoom'],9,['match',['get','class'],'river',4,3],12,['match',['get','class'],'river',5,3.6],14,['match',['get','class'],'river',6,4.2],17,7.5,20,13]}}, firstSymbol);
+    paint:{'line-color':'#6f9aa3', 'line-opacity':.9, 'line-width':['interpolate',['linear'],['zoom'],9,['match',['get','class'],'river',4,3],12,['match',['get','class'],'river',5,3.6],14,['match',['get','class'],'river',6,4.2],17,7.5,20,13]}}, firstSymbol);
   map.addLayer({id:'flow-dash', type:'line', ...WW, layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#ffffff', 'line-opacity':.72,
+    paint:{'line-color':'#ffffff', 'line-opacity':.95,
       'line-width':['interpolate',['linear'],['zoom'],9,1.3,12,1.5,14,1.8,17,2.6,20,4.5], 'line-dasharray':DASH[0]}}, firstSymbol);
   // canal names (Thai), main canals larger; replaces the style's mixed Latin/Thai waterway labels
   if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'visibility', 'none');
@@ -1226,7 +1401,25 @@ function place() {
 // Each label rides the screen edge on the line from the view centre toward its origin (or its lake end),
 // so it slides along the edges as the map is panned/zoomed but never sits over the city itself.
 const CITY = [7.005, 100.47];
+function positionFab() {
+  const fab = document.getElementById('fab'), nar = narrowNow(); if (!fab) return;
+  const mr = document.getElementById('map').getBoundingClientRect(), zl = document.getElementById('zLoc'), lg = document.getElementById('legend'), pill = document.getElementById('legendShow');
+  fab.style.right = ''; fab.style.bottom = '';
+  if (nar) {
+    // as low as it can sit: just above the options bar, or level with the collapsed "ตัวเลือก" pill
+    if (lg && lg.offsetParent) fab.style.bottom = Math.round(mr.bottom - lg.getBoundingClientRect().top + 10) + 'px';
+    else if (pill && !pill.hidden && pill.offsetParent) { const p = pill.getBoundingClientRect(); fab.style.bottom = Math.round(mr.bottom - p.bottom - (fab.offsetHeight - p.height) / 2) + 'px'; }
+  } else if (zl && zl.offsetParent) {
+    // desktop: beside the zoom stack, centred on the locate button
+    const r = zl.getBoundingClientRect(), z = zl.closest('.zoom').getBoundingClientRect();
+    fab.style.right = Math.round(mr.right - z.left + 12) + 'px';
+    fab.style.bottom = Math.round(mr.bottom - (r.top + r.height / 2) - fab.offsetHeight / 2) + 'px';
+  }
+  const fr = fab.getBoundingClientRect(), top = fab.hidden || !fab.offsetParent ? (nar ? 200 : 200) : mr.bottom - fr.top + 14;
+  document.documentElement.style.setProperty('--sea-h', Math.round(top) + 'px');
+}
 function placeSources(W, H) {
+  positionFab();
   if (!callOn) return;
   const lg = document.getElementById('legend'), nar = narrowNow();
   const lgTop = lg && lg.offsetParent ? lg.getBoundingClientRect().top : H;
@@ -1234,9 +1427,16 @@ function placeSources(W, H) {
   const ins = {t: tbB + (nar ? 4 : 6), l: nar ? 4 : 6,
     r: (!nar && (document.body.classList.contains('detail-open') || document.body.classList.contains('sheet-open'))) ? 386 : (nar ? 4 : 6),
     b: nar ? Math.max(170, H - lgTop + 6) : 8};
+  const fab = document.getElementById('fab');
+
   const cx0 = (ins.l + W - ins.r) / 2, cy0 = (ins.t + H - ins.b) / 2;
   const [ccx, ccy] = proj(CITY[0], CITY[1]);
   const placed = [];
+  if (fab && !fab.hidden && fab.offsetParent) { const r = fab.getBoundingClientRect(), mr = document.getElementById('map').getBoundingClientRect();
+    placed.push({x: r.left - mr.left + r.width / 2, y: r.top - mr.top + r.height / 2, w: r.width + 8, h: r.height + 8}); }
+  const ct = document.getElementById('chatTab');
+  if (ct && ct.offsetParent) { const r = ct.getBoundingClientRect(), mr = document.getElementById('map').getBoundingClientRect();
+    placed.push({x: r.left - mr.left + r.width / 2, y: r.top - mr.top + r.height / 2, w: r.width + 10, h: r.height + 10}); }
   SOURCES.forEach(c => {
     const el = c.el, w = el.offsetWidth || 150, h = el.offsetHeight || 34;
     const a = c.out ? c.path[c.path.length - 1] : c.path[0];
@@ -1251,9 +1451,9 @@ function placeSources(W, H) {
     if (!nar) {
       if (edge === 'b' || y > H - 50 - h/2) {               // bottom row is busy: legend left, credits + zoom right
         const lgR = lg && lg.offsetParent ? lg.getBoundingClientRect().right : 0;
-        y = Math.min(y, H - 40 - h/2); x = Math.max(x, lgR + 12 + w/2); x = Math.min(x, W - ins.r - 70 - w/2);
+        y = Math.min(y, H - 74 - h/2);   // clear of the water strip x = Math.max(x, lgR + 12 + w/2); x = Math.min(x, W - ins.r - 70 - w/2);
       }
-      if (edge === 'r' && y > H - 270) y = H - 270;          // above the report button
+      if (edge === 'r' && y > H - 300) y = H - 300;          // above the report button
     }
     // keep labels from stacking on each other: slide along the edge
     const clash = (cx, cy) => placed.find(p => Math.abs(p.x - cx) < (p.w + w)/2 + 6 && Math.abs(p.y - cy) < (p.h + h)/2 + 6);
@@ -1869,8 +2069,68 @@ async function castVote(rid, v) {
 
 /* ---------- wiring ---------- */
 let canEditPage = false;
-function updateFab() { fab.hidden = !(db && repOn) || sheetOpen; }
+function updateFab() { fab.hidden = !(db && repOn) || sheetOpen; positionFab(); }
 fab.addEventListener('click', openSheet);
+
+/* ---------- live chat (collection "chat", kept 24 h) ---------- */
+const CHAT_TTL = 24 * 3600e3, CHAT_GRAD = [['#fbe3d3','#f6d2bf','#9a4f34'],['#dcecec','#c6dfe0','#3f6b74'],['#f7eec4','#efe0a3','#7a6420'],['#e6eedb','#d5e2c5','#4f6a36'],['#ebe6f4','#dcd4ec','#5d5180'],['#f8e0df','#efc9c9','#8b4248']];
+let chatMsgs = [], chatOpen = false, chatSeen = 0, chatSub = false;
+const chatEl = document.getElementById('chat'), chatList = document.getElementById('chatList'), chatBadge = document.getElementById('chatBadge');
+const ago2 = at => { const m = Math.max(0, Math.round((Date.now() - at) / 60000)); return m < 1 ? 'เมื่อกี้' : m < 60 ? m + ' นาที' : Math.floor(m / 60) + ' ชม.'; };
+const hashN = s => { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+function renderChat() {
+  const nearBottom = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 80;
+  const now = Date.now(), list = chatMsgs.filter(m => now - m.at < CHAT_TTL).sort((a, b) => a.at - b.at).slice(-300);
+  chatList.textContent = '';
+  if (!list.length) { const e = document.createElement('div'); e.className = 'chat-empty'; e.innerHTML = 'ยังไม่มีข้อความ<br>เริ่มคุยหรือแจ้งข่าวในพื้นที่ได้เลย'; chatList.append(e); }
+  list.forEach(m => {
+    const w = document.createElement('div'); w.className = 'cmsg' + (m.by && m.by === myId ? ' mine' : '');
+    const n = document.createElement('div'); n.className = 'cname'; const g2 = CHAT_GRAD[hashN(m.by || m.name) % CHAT_GRAD.length]; n.style.setProperty('--c1', g2[0]); n.style.setProperty('--c2', g2[1]); n.style.setProperty('--c3', g2[2]);
+    n.append(document.createTextNode(String(m.name || 'ไม่ระบุชื่อ').slice(0, 24).toUpperCase()));
+    const tm = document.createElement('small'); tm.textContent = ago2(m.at); n.append(tm);
+    if (isAdmin() || (m.by && m.by === myId)) { const d = document.createElement('button'); d.type = 'button'; d.className = 'cdel'; d.textContent = 'ลบ'; d.title = 'ลบข้อความ';
+      d.addEventListener('click', async () => { try { await db.doc('chat/' + m.id).delete(); } catch (e) {} }); n.append(d); }
+    const b = document.createElement('div'); b.className = 'cbody'; b.textContent = String(m.text || '').slice(0, 280);
+    w.append(n, b); chatList.append(w);
+  });
+  if (nearBottom || !chatList.dataset.ready) { chatList.scrollTop = chatList.scrollHeight; chatList.dataset.ready = '1'; }
+  const unread = chatOpen ? 0 : list.filter(m => m.at > chatSeen && m.by !== myId).length;
+  chatBadge.hidden = !unread; chatBadge.textContent = unread > 99 ? '99+' : unread;
+}
+function initChat() {
+  if (!db || chatSub) return; chatSub = true;
+  try { chatSeen = +localStorage.getItem('hy-chat-seen') || Date.now(); } catch (e) { chatSeen = Date.now(); }
+  db.collection('chat').where('at', '>', Date.now() - CHAT_TTL).orderBy('at', 'desc').limit(300).onSnapshot(snap => {
+    chatMsgs = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(m => m && m.text); renderChat(); }, () => {});
+  setInterval(() => { if (chatOpen || !chatBadge.hidden) renderChat(); }, 30000);
+}
+function setChat(open) {
+  chatOpen = open; window.__chatOpen = open; chatEl.classList.toggle('open', open); chatEl.setAttribute('aria-hidden', !open);
+  document.getElementById('chatDim').classList.toggle('on', open); document.getElementById('chatTab').setAttribute('aria-expanded', open);
+  if (open && window.__pullNow) window.__pullNow();
+  if (open) { chatSeen = Date.now(); try { localStorage.setItem('hy-chat-seen', chatSeen); } catch (e) {} chatList.dataset.ready = ''; renderChat();
+    if (!db) document.getElementById('chatNote').textContent = 'แชทยังไม่พร้อม ลองใหม่อีกครั้ง';
+    setTimeout(() => { document.getElementById('chatText').focus({preventScroll: true}); }, 380); }
+  else renderChat();
+}
+document.getElementById('chatTab').addEventListener('click', () => setChat(true));
+document.getElementById('chatClose').addEventListener('click', () => setChat(false));
+document.getElementById('chatGrip').addEventListener('click', () => setChat(false));
+document.getElementById('chatDim').addEventListener('click', () => setChat(false));
+addEventListener('keydown', e => { if (e.key === 'Escape' && chatOpen) setChat(false); });
+try { document.getElementById('chatName').value = localStorage.getItem('hy-chat-name') || ''; } catch (e) {}
+document.getElementById('chatForm').addEventListener('submit', async e => {
+  e.preventDefault(); const note = document.getElementById('chatNote'), nm = document.getElementById('chatName'), tx = document.getElementById('chatText'), btn = document.getElementById('chatSend');
+  const name = nm.value.trim().replace(/\s+/g, ' ').slice(0, 24), text = tx.value.trim().slice(0, 280);
+  if (!text) { tx.focus(); return; }
+  if (!db) { note.textContent = 'แชทยังไม่พร้อม'; return; }
+  try { localStorage.setItem('hy-chat-name', name); } catch (x) {}
+  const nameOut = name || 'ไม่ระบุชื่อ';
+  btn.disabled = true; note.textContent = '';
+  try { await db.collection('chat').add({name: nameOut, text, at: Date.now(), by: myId || ''}); tx.value = ''; chatList.dataset.ready = ''; }
+  catch (x) { note.textContent = /RATE/.test(String(x && x.message)) ? 'ส่งถี่เกินไป รอสักครู่นะคะ' : 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง'; }
+  btn.disabled = false; tx.focus({preventScroll: true});
+});
 async function initReports() {
   try { db = await claude.use('db'); } catch (e) { db = null; }
   try { user = await claude.use('user'); } catch (e) { user = null; }
@@ -1899,6 +2159,7 @@ async function initReports() {
   }, () => {});
   db.doc('site/ticker').onSnapshot(snap => { const d = snap.exists ? snap.data() : null; const on = d && d.on !== false && d.text;
     tickerRaw = {text: on ? String(d.text) : '', src: on && d.src ? String(d.src) : ''}; setTicker(on ? tickerRaw.text + (tickerRaw.src ? '  — ที่มา: ' + tickerRaw.src : '') : ''); refreshAdmin(); }, () => {});
+  initChat();
   updateFab();
 }
 pressable('tgRep', on => { repOn = on; ['rep-area','rep-ripple','rep-ripple2','rep-icon','rep-ver'].forEach(id => map && map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')); renderPhotoPins(); updateFab(); });
