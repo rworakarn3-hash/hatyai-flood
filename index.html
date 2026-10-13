@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261013001316">
+<meta name="build" content="20261013063940">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="แผนที่น้ำท่วมหาดใหญ่ ดูกล้องสด แจ้งจุดน้ำท่วม โดยภาคประชาชน">
 <meta property="og:title" content="ระบบรายงานน้ำท่วมหาดใหญ่โดยภาคประชาชน">
@@ -590,7 +590,9 @@ body.legend-off .legend{display:none!important}
 .chat-form #chatName{flex:0 0 28%;max-width:170px}
 .chat-form #chatText{flex:1}
 .chat-form button{flex:none;border:0;border-radius:14px;padding:0 18px;font:700 14px "Prompt",var(--f-ui);color:#fff;cursor:pointer;background:linear-gradient(135deg,#ea994d,#dd785b);box-shadow:0 8px 18px -8px rgba(221,120,91,.8),inset 0 1px 0 rgba(255,255,255,.35)}
-.chat-form button:disabled{opacity:.5}
+.chat-form button:disabled{opacity:.6;cursor:default}
+.chat-form #chatSend{min-width:56px;font-variant-numeric:tabular-nums}
+.chat-tab.off .ct-bub i{animation:none;opacity:.5}.chat-tab.off .ct-box{filter:grayscale(.7)}
 .chat-note{padding:0 18px 4px;font-size:11px;color:#c4553e;min-height:0}
 @media (max-width:760px){ .chat{width:calc(100% - 64px)} .chat-form #chatName{flex-basis:30%} .chat-tab{top:40%;transform:scale(.88);transform-origin:right center} }
 body.sheet-open .chat-tab{display:none}
@@ -624,6 +626,16 @@ body.sheet-open .chat-tab{display:none}
   animation:fabSpin 2.6s linear infinite;filter:drop-shadow(0 0 4px rgba(255,220,190,.9))}
 @keyframes fabSpin{to{--fabA:360deg}}
 @media (prefers-reduced-motion:reduce){.fab::before{animation-duration:6s}}
+
+/* zoom / locate stack: slim clay-glass bar in the theme colours, 70% */
+.zoom.glass{padding:3px;gap:0;border-radius:14px;border:1px solid rgba(255,255,255,.7);
+  background:radial-gradient(120% 60% at 50% 100%,rgba(180,216,212,.55) 0%,transparent 70%),linear-gradient(170deg,rgba(255,253,249,.7),rgba(243,235,224,.7));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 10px 22px -14px rgba(60,90,96,.6),inset 0 1px 0 rgba(255,255,255,.8),inset 0 -2px 0 rgba(95,143,152,.15)}
+.zoom.glass::before,.zoom.glass::after{display:none}
+.zoom .zbtn{width:28px;height:28px;border-radius:10px;font-size:21px;font-weight:700;line-height:1;color:#46717b}
+.zoom .zbtn svg{width:19px;height:19px}
+.zoom .zbtn:hover{background:rgba(128,164,170,.18)}
+.zoom .zbtn.follow{color:#fff;background:linear-gradient(160deg,#9cc0c4,#5f8f98);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
 </style>
 
 <div class="app no-edges" id="app">
@@ -749,7 +761,7 @@ function drawSeaScene(g, W, H, t, o) {
   <div class="chat-dim" id="chatDim"></div>
   <aside class="chat" id="chat" aria-label="แชทสด" aria-hidden="true">
     <button type="button" class="chat-grip" id="chatGrip" aria-label="ซ่อนแชท" title="ซ่อนแชท"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
-    <div class="chat-head"><div><h2><span class="ch-live" aria-hidden="true"><i></i><i></i><i></i></span>แชทสด</h2><p>คุยกันเรื่องน้ำท่วมหาดใหญ่ · ข้อความลบอัตโนมัติใน 24 ชม.</p></div></div>
+    <div class="chat-head"><div><h2><span class="ch-live" aria-hidden="true"><i></i><i></i><i></i></span>แชทสด</h2><p>คุยกันเรื่องน้ำท่วมหาดใหญ่ · แสดง 30 ข้อความล่าสุด · ลบอัตโนมัติใน 12 ชม.</p></div></div>
     <div class="chat-list" id="chatList" aria-live="polite"></div>
     <div class="chat-note" id="chatNote"></div>
     <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatName" maxlength="24" placeholder="ไม่ระบุชื่อ" aria-label="ชื่อ (ไม่ใส่ก็ได้)"><input id="chatText" maxlength="280" placeholder="พิมพ์ข้อความ…" aria-label="ข้อความ"><button type="submit" id="chatSend">ส่ง</button></form>
@@ -766,9 +778,9 @@ function drawSeaScene(g, W, H, t, o) {
 
 <script>
 /* Google Apps Script backend adapter — gives the page the same small db/user API it uses as an artifact,
-   served by Code.gs (Google Sheet for data, Google Drive for full-size photos). Polls every 15 s. */
+   served by Code.gs (Google Sheet for data, Google Drive for full-size photos). Polls every 40 s (4 s while the chat is open), pauses when idle. */
 (function () {
-  const POLL_MS = 15000;
+  const POLL_MS = 40000, CHAT_POLL_MS = 4000, IDLE_MS = 5 * 60000;   // 40 s normally, 4 s with the live chat open, paused after 5 min untouched
   const run = async (fn, ...a) => { let res;
     try { const r = await fetch(window.API_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({fn, args: a})}); res = await r.json(); }
     catch (e) { throw Object.assign(new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'), {code: 'unavailable'}); }
@@ -777,7 +789,7 @@ function drawSeaScene(g, W, H, t, o) {
   let cid = null; try { cid = localStorage.getItem('hy-cid'); } catch (e) {}
   if (!cid) { cid = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); try { localStorage.setItem('hy-cid', cid); } catch (e) {} }
   const tok = () => { try { return sessionStorage.getItem('hy-admin-token') || ''; } catch (e) { return ''; } };
-  let data = null; try { if (typeof BOOT_PULL === 'string') data = JSON.parse(BOOT_PULL); } catch (e) {} const subs = []; let pulling = false, again = false, soon = null;
+  let backoff = 1; let data = null; try { if (typeof BOOT_PULL === 'string') data = JSON.parse(BOOT_PULL); } catch (e) {} const subs = []; let pulling = false, again = false, soon = null;
   function snapFor(s) {
     const col = (data && data[s.col]) || {};
     if (s.doc) { const o = col[s.id]; return {id: s.id, exists: !!o, data: () => o, metadata: {}}; }
@@ -793,15 +805,21 @@ function drawSeaScene(g, W, H, t, o) {
   const dispatch = () => subs.forEach(fire);
   async function pull() {
     if (pulling) { again = true; return; } pulling = true;
-    try { data = JSON.parse(await run('pull')); dispatch(); } catch (e) { subs.forEach(s => s.err && s.err(e)); }
+    // busy server → back off (×2 per failure, up to ×4); a good answer resets it
+    try { data = JSON.parse(await run('pull')); dispatch(); backoff = 1; } catch (e) { backoff = Math.min(4, backoff * 2); subs.forEach(s => s.err && s.err(e)); }
     pulling = false; if (again) { again = false; pull(); }
   }
   const pullSoon = () => { clearTimeout(soon); soon = setTimeout(pull, 60); };
   window.__pullNow = pullSoon;
   // poll every 15 s, every 4 s while the live chat is open
-  let lastPull = Date.now();
-  setInterval(() => { if (!document.hidden && Date.now() - lastPull >= (window.__chatOpen ? 4000 : POLL_MS)) { lastPull = Date.now(); pull(); } }, 1000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
+  let lastPull = Date.now(), lastTouch = Date.now();
+  const idle = () => Date.now() - lastTouch > IDLE_MS;
+  // any touch / key / scroll wakes polling up again — and fetches straight away if we had paused
+  const wake = () => { const was = idle(); lastTouch = Date.now(); if (was && !document.hidden) { lastPull = Date.now(); pull(); } };
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, wake, {passive: true, capture: true}));
+  setInterval(() => { if (document.hidden || idle()) return;
+    if (Date.now() - lastPull >= (window.__chatOpen ? CHAT_POLL_MS : POLL_MS) * backoff) { lastPull = Date.now(); pull(); } }, 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { lastTouch = Date.now(); lastPull = Date.now(); pull(); } });
   function subscribe(s) { subs.push(s); if (data) fire(s); else pullSoon(); return () => { const i = subs.indexOf(s); if (i >= 0) subs.splice(i, 1); }; }
   async function write(op, col, id, body) {
     const res = JSON.parse(await run('write', JSON.stringify({op, col, id, body, cid, tok: tok()})));
@@ -968,6 +986,13 @@ function renderAdmin() {
     try { await db.doc('site/ticker').set({text: v, src: tsrc.value.trim(), on: true, at: Date.now(), by: myId || ''}); msg.textContent = 'เผยแพร่แล้ว'; } catch (e) { msg.textContent = 'บันทึกไม่สำเร็จ'; } });
   clr.addEventListener('click', async () => { try { await db.doc('site/ticker').set({text: '', on: false, at: Date.now(), by: myId || ''}); msg.textContent = 'ลบประกาศแล้ว'; } catch (e) { msg.textContent = 'บันทึกไม่สำเร็จ'; } });
   r1.append(pub, clr); t.append(ta, tsrc, r1, msg); P.append(t);
+  // live chat on/off
+  const cs = el('div', 'ad-sec'); cs.append(el('h3', null, 'แชทสด'));
+  cs.append(el('div', 'ad-note', chatOff ? 'สถานะ: ปิดอยู่ (ผู้ใช้อ่านได้ แต่ส่งข้อความไม่ได้)' : 'สถานะ: เปิดอยู่'));
+  const ct = el('button', chatOff ? 'cbtn pri' : 'cbtn', chatOff ? 'เปิดแชทสดอีกครั้ง' : 'ปิดแชทสดชั่วคราว'); ct.type = 'button';
+  const cmsg = el('div', 'ad-note', '');
+  ct.addEventListener('click', async () => { try { await db.doc('site/chat').set({on: chatOff, at: Date.now(), by: myId || ''}); } catch (e) { cmsg.textContent = 'บันทึกไม่สำเร็จ'; } });
+  cs.append(ct, cmsg); P.append(cs);
   // shelters
   const sh = el('div', 'ad-sec'); sh.append(el('h3', null, 'จุดอพยพ'));
   if (!pickShelter) {
@@ -1324,10 +1349,12 @@ const BASE_TINT = [
   ['landuse_cemetery','fill-color','#dfe3cf'], ['landuse_pitch','fill-color','#dfe3cf'], ['landcover_sand','fill-color','#f3ead0'],
   ['building','fill-color','#e7dfd3'],
   ...['road','bridge','tunnel'].flatMap(k => [
-    [k+'_trunk_primary','line-color','#f6e3a1'], [k+'_secondary_tertiary','line-color','#f8ecc0'], [k+'_link','line-color','#f8ecc0'],
-    [k+'_motorway','line-color','#f2c08f'], [k+'_motorway_link','line-color','#f2c08f'],
-    [k+'_trunk_primary_casing','line-color','#e3b896'], [k+'_secondary_tertiary_casing','line-color','#e3c3a4'], [k+'_link_casing','line-color','#e3c3a4'],
-    [k+'_motorway_casing','line-color','#dd9f7a'], [k+'_motorway_link_casing','line-color','#dd9f7a']])
+    // roads kept quiet so flood reports, cameras and canals stand out
+    [k+'_trunk_primary','line-color','#f9ebc6'], [k+'_secondary_tertiary','line-color','#fbf2da'], [k+'_link','line-color','#fbf2da'],
+    [k+'_motorway','line-color','#f6d8b9'], [k+'_motorway_link','line-color','#f6d8b9'],
+    [k+'_trunk_primary_casing','line-color','#e4c8ac'], [k+'_secondary_tertiary_casing','line-color','#e6d3bf'], [k+'_link_casing','line-color','#e6d3bf'],
+    [k+'_motorway_casing','line-color','#e0b598'], [k+'_motorway_link_casing','line-color','#e0b598'],
+    [k+'_minor','line-color','#ffffff'], [k+'_minor_casing','line-color','#e3d9cb']])
 ];
 function tintBasemap() { BASE_TINT.forEach(([id, prop, v]) => { if (map.getLayer(id)) try { map.setPaintProperty(id, prop, v); } catch (e) {} }); }
 // map labels: Thai name first (falls back to the local/Latin name only where no Thai name exists)
@@ -1448,7 +1475,8 @@ function positionFab() {
   if (nar) {
     // as low as it can sit: just above the options bar, or level with the collapsed "ตัวเลือก" pill
     if (lg && lg.offsetParent) fab.style.bottom = Math.round(mr.bottom - lg.getBoundingClientRect().top + 10) + 'px';
-    else if (pill && !pill.hidden && pill.offsetParent) { const p = pill.getBoundingClientRect(); fab.style.bottom = Math.round(mr.bottom - p.bottom - (fab.offsetHeight - p.height) / 2) + 'px'; }
+    // options bar tucked away: sit level with the locate button (never hugging the bottom edge / home bar)
+    else if (zl && zl.offsetParent) fab.style.bottom = `max(${Math.round(mr.bottom - zl.getBoundingClientRect().bottom - 44)}px, calc(58px + env(safe-area-inset-bottom,0px)))`;
   } else if (zl && zl.offsetParent) {
     // desktop: beside the zoom stack, centred on the locate button
     const r = zl.getBoundingClientRect(), z = zl.closest('.zoom').getBoundingClientRect();
@@ -1474,6 +1502,9 @@ function placeSources(W, H) {
   const placed = [];
   if (fab && !fab.hidden && fab.offsetParent) { const r = fab.getBoundingClientRect(), mr = document.getElementById('map').getBoundingClientRect();
     placed.push({x: r.left - mr.left + r.width / 2, y: r.top - mr.top + r.height / 2, w: r.width + 8, h: r.height + 8}); }
+  const zs = document.querySelector('.zoom');
+  if (zs && zs.offsetParent) { const r = zs.getBoundingClientRect(), mr = document.getElementById('map').getBoundingClientRect();
+    placed.push({x: r.left - mr.left + r.width / 2, y: r.top - mr.top + r.height / 2, w: r.width + 12, h: r.height + 12}); }
   const ct = document.getElementById('chatTab');
   if (ct && ct.offsetParent) { const r = ct.getBoundingClientRect(), mr = document.getElementById('map').getBoundingClientRect();
     placed.push({x: r.left - mr.left + r.width / 2, y: r.top - mr.top + r.height / 2, w: r.width + 10, h: r.height + 10}); }
@@ -2115,14 +2146,14 @@ function updateFab() { fab.hidden = !(db && repOn) || sheetOpen; positionFab(); 
 fab.addEventListener('click', openSheet);
 
 /* ---------- live chat (collection "chat", kept 24 h) ---------- */
-const CHAT_TTL = 24 * 3600e3, CHAT_GRAD = [['#fbe3d3','#f6d2bf','#9a4f34'],['#dcecec','#c6dfe0','#3f6b74'],['#f7eec4','#efe0a3','#7a6420'],['#e6eedb','#d5e2c5','#4f6a36'],['#ebe6f4','#dcd4ec','#5d5180'],['#f8e0df','#efc9c9','#8b4248']];
-let chatMsgs = [], chatOpen = false, chatSeen = 0, chatSub = false;
+const CHAT_TTL = 12 * 3600e3, CHAT_SHOW = 30, CHAT_WAIT = 10, CHAT_GRAD = [['#fbe3d3','#f6d2bf','#9a4f34'],['#dcecec','#c6dfe0','#3f6b74'],['#f7eec4','#efe0a3','#7a6420'],['#e6eedb','#d5e2c5','#4f6a36'],['#ebe6f4','#dcd4ec','#5d5180'],['#f8e0df','#efc9c9','#8b4248']];
+let chatMsgs = [], chatOpen = false, chatSeen = 0, chatSub = false, chatOff = false, chatWaitT = null;
 const chatEl = document.getElementById('chat'), chatList = document.getElementById('chatList'), chatBadge = document.getElementById('chatBadge');
 const ago2 = at => { const m = Math.max(0, Math.round((Date.now() - at) / 60000)); return m < 1 ? 'เมื่อกี้' : m < 60 ? m + ' นาที' : Math.floor(m / 60) + ' ชม.'; };
 const hashN = s => { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
 function renderChat() {
   const nearBottom = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 80;
-  const now = Date.now(), list = chatMsgs.filter(m => now - m.at < CHAT_TTL).sort((a, b) => a.at - b.at).slice(-300);
+  const now = Date.now(), list = chatMsgs.filter(m => now - m.at < CHAT_TTL).sort((a, b) => a.at - b.at).slice(-CHAT_SHOW);
   chatList.textContent = '';
   if (!list.length) { const e = document.createElement('div'); e.className = 'chat-empty'; e.innerHTML = 'ยังไม่มีข้อความ<br>เริ่มคุยหรือแจ้งข่าวในพื้นที่ได้เลย'; chatList.append(e); }
   list.forEach(m => {
@@ -2142,9 +2173,23 @@ function renderChat() {
 function initChat() {
   if (!db || chatSub) return; chatSub = true;
   try { chatSeen = +localStorage.getItem('hy-chat-seen') || Date.now(); } catch (e) { chatSeen = Date.now(); }
-  db.collection('chat').where('at', '>', Date.now() - CHAT_TTL).orderBy('at', 'desc').limit(300).onSnapshot(snap => {
+  db.collection('chat').where('at', '>', Date.now() - CHAT_TTL).orderBy('at', 'desc').limit(CHAT_SHOW).onSnapshot(snap => {
     chatMsgs = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(m => m && m.text); renderChat(); }, () => {});
   setInterval(() => { if (chatOpen || !chatBadge.hidden) renderChat(); }, 30000);
+  db.doc('site/chat').onSnapshot(s => { const d = s.exists ? s.data() : null; chatOff = !!(d && d.on === false); syncChatOff(); refreshAdmin(); }, () => {});
+}
+function syncChatOff() {
+  const f = document.getElementById('chatForm'), note = document.getElementById('chatNote');
+  f.querySelectorAll('input, button').forEach(x => { x.disabled = chatOff || (x.id === 'chatSend' && !!chatWaitT); });
+  if (chatOff) note.textContent = 'ผู้ดูแลปิดแชทสดไว้ชั่วคราว เพื่อให้ระบบรายงานน้ำท่วมทำงานได้เต็มที่';
+  else if (note.textContent.startsWith('ผู้ดูแลปิดแชท')) note.textContent = '';
+  document.getElementById('chatTab').classList.toggle('off', chatOff);
+}
+// after sending: the send button counts down before the next message is allowed
+function chatCooldown(sec) {
+  const btn = document.getElementById('chatSend'); clearInterval(chatWaitT); let n = Math.max(1, Math.ceil(sec));
+  const tick = () => { if (n <= 0) { clearInterval(chatWaitT); chatWaitT = null; btn.textContent = 'ส่ง'; btn.disabled = chatOff; return; } btn.textContent = n; btn.disabled = true; n--; };
+  chatWaitT = setInterval(tick, 1000); tick();
 }
 function setChat(open) {
   chatOpen = open; window.__chatOpen = open; chatEl.classList.toggle('open', open); chatEl.setAttribute('aria-hidden', !open);
@@ -2167,10 +2212,13 @@ document.getElementById('chatForm').addEventListener('submit', async e => {
   if (!db) { note.textContent = 'แชทยังไม่พร้อม'; return; }
   try { localStorage.setItem('hy-chat-name', name); } catch (x) {}
   const nameOut = name || 'ไม่ระบุชื่อ';
+  if (chatOff || chatWaitT) return;
   btn.disabled = true; note.textContent = '';
-  try { await db.collection('chat').add({name: nameOut, text, at: Date.now(), by: myId || ''}); tx.value = ''; chatList.dataset.ready = ''; }
-  catch (x) { note.textContent = /RATE/.test(String(x && x.message)) ? 'ส่งถี่เกินไป รอสักครู่นะคะ' : 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง'; }
-  btn.disabled = false; tx.focus({preventScroll: true});
+  try { await db.collection('chat').add({name: nameOut, text, at: Date.now(), by: myId || ''}); tx.value = ''; chatList.dataset.ready = ''; chatCooldown(CHAT_WAIT); }
+  catch (x) { const m = String(x && x.message || ''), w = /(\d+)\s*วินาที/.exec(m);
+    if (/RATE/.test(m)) { note.textContent = 'ส่งถี่เกินไป รอสักครู่นะคะ'; chatCooldown(w ? +w[1] : CHAT_WAIT); }
+    else { note.textContent = /CHAT_OFF/.test(m) ? 'ผู้ดูแลปิดแชทสดไว้ชั่วคราว' : 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง'; btn.disabled = false; } }
+  tx.focus({preventScroll: true});
 });
 
 /* ---------- cute UI sounds (synthesised, no files) — each kind of action has its own voice ---------- */

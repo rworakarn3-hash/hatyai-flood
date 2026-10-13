@@ -15,7 +15,9 @@
 
 const SITE = 'https://hatyaicityclimate.org';
 const COLS = ['reports', 'votes', 'photos', 'photofull', 'shelters', 'shelterEdits', 'site', 'chat'];
-const CHAT_TTL_H = 24;                // live chat messages are deleted after this
+const CHAT_TTL_H = 12;                // live chat messages are deleted after this
+const CHAT_SHOW = 30;                 // only the newest messages are sent to the page
+const CHAT_WAIT_S = 10;               // one message per person per 10 s
 const ADMIN_ONLY = ['shelters', 'shelterEdits', 'site'];
 const LIVE_WINDOW_H = 14;            // reports / votes / photos sent to the page (page shows 12 h)
 const KEEP_DAYS = 30;                // cleanup keeps this much history in the sheet
@@ -80,17 +82,30 @@ function findRow_(rows, col, id) { return rows.find(r => r.col === col && r.id =
 
 /** Everything the page needs, as one JSON string: {col: {id: data}} (full-size photos excluded). */
 function pull() {
-  const cached = getBig_('pull'); if (cached) return cached;
-  const since = Date.now() - LIVE_WINDOW_H * 3600e3, out = {};
-  COLS.forEach(c => { out[c] = {}; });
-  readAll_().forEach(r => {
-    if (r.col === 'photofull') return;
-    if (['reports', 'votes', 'photos'].indexOf(r.col) >= 0 && r.at < since) return;
-    if (r.col === 'chat' && r.at < Date.now() - CHAT_TTL_H * 3600e3) return;
-    try { out[r.col][r.id] = JSON.parse(r.json); } catch (e) {}
-  });
-  const s = JSON.stringify(out); putBig_('pull', s, 120); return s;
+  // reports & co. (cached 2 min, cleared by report writes) + live chat (its own small cache, cleared by chat writes)
+  let main = getBig_('pull');
+  if (!main) {
+    const since = Date.now() - LIVE_WINDOW_H * 3600e3, out = {};
+    COLS.forEach(c => { if (c !== 'chat') out[c] = {}; });
+    readAll_().forEach(r => {
+      if (r.col === 'photofull' || r.col === 'chat') return;
+      if (['reports', 'votes', 'photos'].indexOf(r.col) >= 0 && r.at < since) return;
+      try { out[r.col][r.id] = JSON.parse(r.json); } catch (e) {}
+    });
+    main = JSON.stringify(out); putBig_('pull', main, 120);
+  }
+  return main.slice(0, -1) + (main.length > 2 ? ',' : '') + '"chat":' + chatJson_() + '}';
 }
+/** The newest CHAT_SHOW messages of the last CHAT_TTL_H hours, as {id: msg} JSON. */
+function chatJson_() {
+  const cache = CacheService.getScriptCache(), c = cache.get('chatc'); if (c) return c;
+  const old = Date.now() - CHAT_TTL_H * 3600e3, out = {};
+  readAll_().filter(r => r.col === 'chat' && r.at >= old).sort((a, b) => a.at - b.at).slice(-CHAT_SHOW)
+    .forEach(r => { try { out[r.id] = JSON.parse(r.json); } catch (e) {} });
+  const s = JSON.stringify(out); try { cache.put('chatc', s, 300); } catch (e) {} return s;
+}
+const clearChat_ = () => CacheService.getScriptCache().remove('chatc');
+function chatOff_() { return PropertiesService.getScriptProperties().getProperty('CHAT_OFF') === '1'; }
 
 /** Only full-size photos are fetched one at a time (from Drive). */
 function getDoc(col, id) {
@@ -110,6 +125,18 @@ function write(payload) {
   if (!/^u[a-z0-9]{6,40}$/.test(cid)) return err_('INVALID client');
   if (!admin && !rateOk_(cid)) return err_('RATE: ส่งบ่อยเกินไป รอสักครู่แล้วลองใหม่', 'invalid_argument');
   if (ADMIN_ONLY.indexOf(col) >= 0 && !admin) return err_('DENIED: ต้องเข้าสู่โหมดผู้ดูแล');
+  if (col === 'chat' && op === 'add') {
+    if (chatOff_() && !admin) return err_('DENIED: CHAT_OFF ผู้ดูแลปิดแชทชั่วคราว');
+    const text = str_((q.body || {}).text, 280); if (!text) return err_('INVALID: ข้อความว่าง');
+    const cache = CacheService.getScriptCache(), rk = 'cw_' + cid, until = +(cache.get(rk) || 0), now0 = Date.now();
+    if (!admin && until > now0) return err_('RATE: รออีก ' + Math.ceil((until - now0) / 1000) + ' วินาที', 'invalid_argument');
+    cache.put(rk, String(now0 + CHAT_WAIT_S * 1000), CHAT_WAIT_S + 1);
+    const body2 = {name: str_((q.body || {}).name, 24) || 'ไม่ระบุชื่อ', text, at: now0, by: cid};
+    const id2 = 'c' + now0.toString(36) + Math.random().toString(36).slice(2, 7);
+    const lk = LockService.getScriptLock(); lk.waitLock(10000);
+    try { sheet_().appendRow(['chat', id2, JSON.stringify(body2), now0, new Date()]); } finally { lk.releaseLock(); }
+    clearChat_(); return ok_({id: id2});
+  }
 
   const lock = LockService.getScriptLock(); lock.waitLock(15000);
   try {
@@ -122,7 +149,7 @@ function write(payload) {
       if (!cur) return ok_({id});
       if (!admin && !owns(curData) && !(col === 'votes' && id.endsWith('__' + cid))) return err_('DENIED: ลบได้เฉพาะของตัวเองหรือผู้ดูแล');
       if (col === 'photofull' && curData.fileId) { try { DriveApp.getFileById(curData.fileId).setTrashed(true); } catch (e) {} }
-      sh.deleteRow(cur.row); clearBig_('pull'); return ok_({id});
+      sh.deleteRow(cur.row); if (col === 'chat') clearChat_(); else clearBig_('pull'); return ok_({id});
     }
 
     if (op === 'update') { if (!cur) return err_('INVALID: ไม่มีเอกสารนี้'); if (!admin && !owns(curData)) return err_('DENIED'); body = Object.assign({}, curData, body); }
@@ -145,7 +172,8 @@ function write(payload) {
     if (col === 'chat') { if (op !== 'add' && !admin) return err_('DENIED: แก้ข้อความแชทไม่ได้');
       const text = str_(body.text, 280); if (!text) return err_('INVALID: ข้อความว่าง');
       body = {name: str_(body.name, 24) || 'ไม่ระบุชื่อ', text, at: now, by: cid}; }
-    if (col === 'site') body = {text: str_(body.text, 300), src: str_(body.src, 60), on: body.on !== false, at: now, by: 'admin'};
+    if (col === 'site' && id === 'chat') { body = {on: body.on !== false, at: now, by: 'admin'}; PropertiesService.getScriptProperties().setProperty('CHAT_OFF', body.on ? '0' : '1'); }
+    else if (col === 'site') body = {text: str_(body.text, 300), src: str_(body.src, 60), on: body.on !== false, at: now, by: 'admin'};
     if (col !== 'reports' && col !== 'votes' && col !== 'photos' && col !== 'photofull' && body.by == null) body.by = cid;
 
     const json = JSON.stringify(body); if (json.length > 48000) return err_('INVALID: ข้อมูลใหญ่เกินไป');
@@ -301,7 +329,7 @@ function purgeChat_() {
   const old = Date.now() - CHAT_TTL_H * 3600e3, rows = readAll_().filter(r => r.col === 'chat' && r.at && r.at < old);
   if (!rows.length) return;
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
-  try { const sh = sheet_(); readAll_().filter(r => r.col === 'chat' && r.at && r.at < old).reverse().forEach(r => sh.deleteRow(r.row)); clearBig_('pull'); }
+  try { const sh = sheet_(); readAll_().filter(r => r.col === 'chat' && r.at && r.at < old).reverse().forEach(r => sh.deleteRow(r.row)); clearChat_(); }
   finally { lock.releaseLock(); }
 }
 
