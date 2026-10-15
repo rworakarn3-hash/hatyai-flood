@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261013063940">
+<meta name="build" content="20261013201302">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="แผนที่น้ำท่วมหาดใหญ่ ดูกล้องสด แจ้งจุดน้ำท่วม โดยภาคประชาชน">
 <meta property="og:title" content="ระบบรายงานน้ำท่วมหาดใหญ่โดยภาคประชาชน">
@@ -533,7 +533,7 @@ body.legend-off .legend{display:none!important}
 #calls .src:hover{opacity:1}
 /* ---------- live chat: tab on the right edge → panel slides in over everything ---------- */
 /* live-chat badge: clay speech bubble with typing dots + "LIVE / แชทสด" box, tucked against the right edge */
-.chat-tab{position:absolute;right:0;top:44%;z-index:55;border:0;padding:0 0 0 0;background:none;cursor:pointer;width:68px;height:68px;filter:drop-shadow(-4px 8px 12px rgba(60,90,96,.35))}
+.chat-tab{position:absolute;right:0;top:calc(var(--tbh) + 12px);z-index:8;border:0;padding:0 0 0 0;background:none;cursor:pointer;width:68px;height:68px;filter:drop-shadow(-4px 8px 12px rgba(60,90,96,.35))}
 .ct-box{position:absolute;right:0;bottom:0;width:68px;height:44px;border-radius:16px 0 0 16px;background:linear-gradient(160deg,#8fb7bb,#5a8a94);
   box-shadow:inset 1px 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(30,60,70,.22);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 8px 3px;color:#fff;line-height:1}
 .ct-box b{font:800 10px "Prompt",var(--f-ui);letter-spacing:1.6px;opacity:.95}
@@ -594,8 +594,8 @@ body.legend-off .legend{display:none!important}
 .chat-form #chatSend{min-width:56px;font-variant-numeric:tabular-nums}
 .chat-tab.off .ct-bub i{animation:none;opacity:.5}.chat-tab.off .ct-box{filter:grayscale(.7)}
 .chat-note{padding:0 18px 4px;font-size:11px;color:#c4553e;min-height:0}
-@media (max-width:760px){ .chat{width:calc(100% - 64px)} .chat-form #chatName{flex-basis:30%} .chat-tab{top:40%;transform:scale(.88);transform-origin:right center} }
-body.sheet-open .chat-tab{display:none}
+@media (max-width:760px){ .chat{width:calc(100% - 64px)} .chat-form #chatName{flex-basis:30%} .chat-tab{top:calc(var(--tbh) + 8px);transform:scale(.88);transform-origin:right top} }
+body.sheet-open .chat-tab,body.detail-open .chat-tab{display:none}
 
 /* ---------- bottom options bar: same clay-glass language as the live chat ---------- */
 #legend.legend{border-radius:22px;border:1px solid rgba(255,255,255,.7);
@@ -748,6 +748,7 @@ function drawSeaScene(g, W, H, t, o) {
       <button type="button" class="tg" id="tgShelter" aria-pressed="false">ศูนย์อพยพ</button>
       <button type="button" class="tg" id="tgFlow" aria-pressed="true">ทิศทางน้ำ</button>
       <button type="button" class="tg" id="tgCall" aria-pressed="true">ที่มาของน้ำ</button>
+      <button type="button" class="tg" id="tgCam" aria-pressed="true">กล้อง CCTV</button>
       <span class="tg-sep" aria-hidden="true"></span>
       <button type="button" class="tg tg-sub" id="shelterBtn" aria-expanded="false" aria-controls="shelterPanel">รายชื่อศูนย์อพยพ ▸</button>
       <button type="button" class="tg tg-sub" id="flowBtn" aria-expanded="false" aria-controls="flowPanel">ลำดับ flow ▸</button>
@@ -1050,9 +1051,10 @@ function cityStats() {
   const worst = live.slice().sort((a, b) => b.level - a.level || b.at - a.at).filter(r => r.road).slice(0, 3);
   return {n: live.length, byLv, worst, shelters: SH_ALL.filter(s => s.prec).length};
 }
-function cityText() { const c = cityStats();
-  return `🌊 หาดใหญ่ตอนนี้ (${thTime(Date.now())})\nจุดน้ำท่วมที่ชาวบ้านรายงาน: ${c.n} จุด` + (WX && WX.now ? `\nฝนสะสม 24 ชม.: ${Math.round(WX.now.rain24)} มม.` : '')
-    + (c.worst.length ? `\nหนักสุด: ${c.worst.map(r => `${r.road} — ${sevHead(r)}`).join(', ')}` : '') + `\nศูนย์อพยพบนแผนที่: ${c.shelters} แห่ง\nดูแผนที่สด / ช่วยรายงาน: ${SHARE_URL}\n${HASHTAG}`; }
+function cityText() { const c = cityStats(), d0 = WX && WX.days && WX.days[0];
+  return `🌊 หาดใหญ่ตอนนี้ (${thTime(Date.now())})\n` + (c.n ? `จุดน้ำท่วมที่ชาวบ้านรายงาน: ${c.n} จุด` : 'ยังไม่มีจุดน้ำท่วม')
+    + (WX && WX.now ? `\nฝนสะสม 24 ชม.: ${Math.round(WX.now.rain24)} มม.` : '') + (d0 ? `\nพื้นที่ฝนตกวันนี้: ${d0.pop}%` : '')
+    + (c.worst.length ? `\nหนักสุด: ${c.worst.map(r => `${r.road} — ${sevHead(r)}`).join(', ')}` : '') + `\nดูแผนที่สด / ช่วยรายงาน: ${SHARE_URL}\n${HASHTAG}`; }
 function shareLine(text) { const a = document.createElement('a'); a.href = 'https://line.me/R/share?text=' + encodeURIComponent(text); a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.append(a); a.click(); a.remove(); }
 async function copyText(t, btn) { let ok = false; try { await navigator.clipboard.writeText(t); ok = true; } catch (e) {
     const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.append(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (x) {} ta.remove(); }
@@ -1251,10 +1253,11 @@ async function drawCard(kind, fmt, id) {
     g.font = F(600, 28); g.fillStyle = '#5c6d73'; g.fillText('อัปเดต ' + thTime(Date.now()), 72, y);
     y += story ? 118 : 100; g.fillStyle = '#1f3a46'; g.font = F(700, story ? 112 : 92); g.fillText('หาดใหญ่ตอนนี้', 72, y);
     y += story ? 110 : 90;
-    const nums = [[String(cs.n), 'จุดน้ำท่วม', '#e8735a'], [WX && WX.now ? String(Math.round(WX.now.rain24)) : '–', 'มม. ฝน 24 ชม.', '#3f7f90'], [String(cs.shelters), 'ศูนย์อพยพ', '#7d8130']];
+    const nums = [[String(cs.n), 'จุดน้ำท่วม', '#e8735a'], [WX && WX.now ? String(Math.round(WX.now.rain24)) : '–', 'มม. ฝน 24 ชม.', '#3f7f90'], [WX && WX.days && WX.days[0] ? WX.days[0].pop + '%' : '–', 'พื้นที่ฝนตกวันนี้', '#7d8130']];
     const cw = (W - 144) / 3; nums.forEach(([v, l, cc], i) => { const x = 72 + i * cw; g.fillStyle = cc; g.font = F(700, story ? 84 : 70); g.fillText(v, x, y); g.fillStyle = '#7a8a90'; g.font = F(500, 26); g.fillText(l, x, y + 42); });
     y += story ? 110 : 90;
-    if (cs.worst.length) { const k = story ? 3 : 2; cs.worst.slice(0, k).forEach(r => { g.fillStyle = LVL[r.level].color; g.beginPath(); g.arc(84, y - 11, 10, 0, Math.PI * 2); g.fill();
+    if (!cs.n) { g.fillStyle = '#3f7f90'; g.font = F(700, story ? 44 : 38); g.fillText('✓ ยังไม่มีจุดน้ำท่วม', 72, y); y += 64; }
+    else if (cs.worst.length) { const k = story ? 3 : 2; cs.worst.slice(0, k).forEach(r => { g.fillStyle = LVL[r.level].color; g.beginPath(); g.arc(84, y - 11, 10, 0, Math.PI * 2); g.fill();
       g.fillStyle = '#1f3a46'; g.font = F(600, 32); wrap(g, `${r.road} — ${sevHead(r)}`, 108, y, W - 180, 40, 1); y += 52; }); y += 12; }
     const imgH = footTop - y - 96, shot = await mapShot({bounds: HOME});
     if (imgH > 140) { imgFrame(g, 72, y, W - 144, imgH, 36); if (shot) cover(g, shot, 72, y, W - 144, imgH, 36);
@@ -1404,9 +1407,10 @@ function addOverlayLayers() {
   addSourceLayers();
   addShelterLayers();
   addReportLayers();
-  setFlowVisible(flowOn);
+  setFlowVisible(flowOn); setCamVisible(camOn);
 }
-let flowOn = true, dashStep = 0;
+let flowOn = true, dashStep = 0, camOn = true;
+function setCamVisible(on) { ['cam-route','cam-sel','cam-icon'].forEach(id => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')); }
 const DASH = [[0,4,3],[0.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,0.5],[3,4,0],[0,0.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,0.5]];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function animateFlow(ts) {
@@ -1635,6 +1639,7 @@ function pressable(id, fn) { const b = document.getElementById(id); b.addEventLi
 pressable('tgEdges', on => app.classList.toggle('no-edges', !on));
 pressable('tgCall', on => { callOn = on; app.classList.toggle('no-call', !on); place(); });
 pressable('tgFlow', on => { flowOn = on; if (map) setFlowVisible(on); });
+pressable('tgCam', on => { camOn = on; if (map) setCamVisible(on); });
 /* ---------- my location ---------- */
 let me = null, picking = false;
 const meEl = document.createElement('div'); meEl.className = 'me'; meEl.hidden = true; meEl.innerHTML = '<span class="halo"></span><span class="core"></span>'; pinsEl.appendChild(meEl);

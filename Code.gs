@@ -286,12 +286,13 @@ function refreshWeather_() {
     const st = [].concat((obs.Stations && obs.Stations.Station) || []);
     const S = n => st.find(s => String(s.WmoStationNumber) === n);
     const num = v => Math.round(parseFloat(v) * 10) / 10;
-    const hy = S('48569'); if (!hy) throw new Error('no Hat Yai station');
+    const hy = S('48571') || S('48569'); if (!hy) throw new Error('no Kho Hong / Hat Yai station');   // คอหงส์ first, airport as backup
     const o = hy.Observation, m = /^(\d+)\/(\d+)\/(\d+) (\d+):(\d+)/.exec(o.DateTime);   // MM/DD/YYYY HH:mm
     const obsAt = m ? `${m[4]}:${m[5]} น. ${+m[2]} ${TH_M[+m[1] - 1]} ${(+m[3] + 543) % 100}` : '';
-    const wx = {obsAt, src: 'TMD', now: {name: 'สนามบินหาดใหญ่', t: num(o.AirTemperature), rh: Math.round(+o.RelativeHumidity), rain24: num(o.Rainfall24Hr), rain1: num(o.Rainfall)},
-      stations: [['48571', 'คอหงส์'], ['48574', 'สะเดา'], ['48568', 'สงขลา']].map(([n, name]) => { const s = S(n); return s ? {name, t: num(s.Observation.AirTemperature), rain24: num(s.Observation.Rainfall24Hr)} : null; }).filter(Boolean),
+    const wx = {obsAt, src: 'TMD', now: {name: hy === S('48571') ? 'คอหงส์' : 'สนามบินหาดใหญ่', t: num(o.AirTemperature), rh: Math.round(+o.RelativeHumidity), rain24: num(o.Rainfall24Hr), rain1: num(o.Rainfall)},
+      stations: [['48569', 'สนามบินหาดใหญ่'], ['48574', 'สะเดา'], ['48568', 'สงขลา']].map(([n, name]) => { const s = S(n); return s ? {name, t: num(s.Observation.AirTemperature), rain24: num(s.Observation.Rainfall24Hr)} : null; }).filter(Boolean),
       days: []};
+    wx.stations = wx.stations.filter(x => x.name !== wx.now.name);
     const prov = [].concat((fc.Provinces && fc.Provinces.Province) || []).find(x => x.ProvinceNameThai === 'สงขลา');
     if (prov) { const f = prov.SevenDaysForecast, today = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyyyMMdd');
       wx.days = f.ForecastDate.map((d, i) => { const [dd, mm, yy] = d.split('/').map(Number); const dt = new Date(yy, mm - 1, dd);
