@@ -1,0 +1,8 @@
+/build.txt
+  Cache-Control: no-store
+/logo.webp
+  Cache-Control: public, max-age=604800
+/logo.png
+  Cache-Control: public, max-age=604800
+/fallback.js
+  Cache-Control: public, max-age=3600
